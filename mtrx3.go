@@ -22,6 +22,7 @@ type mtrx3_t [9]float32
 
 func id_rw(i int32, j int32, n int32) int32
 func id_cw(i int32, j int32, n int32) int32
+
 func mtrx3_set(m [9]float32) (rt mtrx3_t)
 func mtrx3_set_euler(yaw, pitch, roll float64) (rt mtrx3_t)
 func mtrx3_set_axisangl(ax vec3_t, phi float64) (rt mtrx3_t)
@@ -36,14 +37,6 @@ func mtrx3_get_transpose(m mtrx3_t) (rt mtrx3_t)
 func mtrx3_tranpose_self(m mtrx3_t)
 
 */
-
-func id_rw(i int32, j int32, n int32) int32 {
-	return (i*n + j)
-}
-
-func id_cw(i int32, j int32, n int32) int32 {
-	return (j*n + i)
-}
 
 func mtrx3_set(m [9]float32) (rt mtrx3_t) {
 	var (
