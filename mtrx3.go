@@ -22,8 +22,8 @@ type mtrx3_t [9]float32
 
 func mtrx3_idtt() (rt mtrx3_t)
 func mtrx3_set(m [9]float32) (rt mtrx3_t)
-func mtrx3_set_euler(yaw, pitch, roll float64) (rt mtrx3_t)
-func mtrx3_set_axisangl(ax vec3_t, phi float64) (rt mtrx3_t)
+func mtrx3_set_euler(yaw, pitch, roll float32) (rt mtrx3_t)
+func mtrx3_set_axisangl(ax vec3_t, phi float32) (rt mtrx3_t)
 func mtrx3_show(m mtrx3_t)
 func mtrx3_det(m mtrx3_t) (rt float32)
 func mtrx3_det_lu(m mtrx3_t) (rt float32)
@@ -73,17 +73,17 @@ func mtrx3_set(m [9]float32) (rt mtrx3_t) {
 	return rt
 }
 
-func mtrx3_set_euler(yaw, pitch, roll float64) (rt mtrx3_t) {
+func mtrx3_set_euler(yaw, pitch, roll float32) (rt mtrx3_t) {
 	var (
 		cosy, siny, cosp, sinp, cosr, sinr float32
 	)
 
-	cosy = float32(math.Cos(yaw))
-	siny = float32(math.Sin(yaw))
-	cosp = float32(math.Cos(pitch))
-	sinp = float32(math.Sin(pitch))
-	cosr = float32(math.Cos(roll))
-	sinr = float32(math.Sin(roll))
+	cosy = cosf(yaw)
+	siny = sinf(yaw)
+	cosp = cosf(pitch)
+	sinp = sinf(pitch)
+	cosr = cosf(roll)
+	sinr = sinf(roll)
 
 	rt[0] = cosy*cosr - siny*cosp*sinr
 	rt[1] = -cosy*sinr - siny*cosp*cosr
@@ -100,13 +100,13 @@ func mtrx3_set_euler(yaw, pitch, roll float64) (rt mtrx3_t) {
 	return rt
 }
 
-func mtrx3_set_axisangl(ax vec3_t, phi float64) (rt mtrx3_t) {
+func mtrx3_set_axisangl(ax vec3_t, phi float32) (rt mtrx3_t) {
 	var (
 		cosphi, sinphi, vxvy, vxvz, vyvz, vx, vy, vz float32
 	)
 
-	cosphi = float32(math.Cos(phi))
-	sinphi = float32(math.Sin(phi))
+	cosphi = cosf(phi)
+	sinphi = sinf(phi)
 	vxvy = ax[_XC] * ax[_YC]
 	vxvz = ax[_XC] * ax[_ZC]
 	vyvz = ax[_YC] * ax[_ZC]
@@ -342,7 +342,7 @@ func mtrx3_invert(m mtrx3_t) (rt mtrx3_t) {
 	det = m[0]*inverse[0] + m[1]*inverse[3] +
 		m[2]*inverse[6]
 
-	if math.Abs(float64(det)) < 0.000001 {
+	if fabs(det) < f_eps {
 		fmt.Println("mtrx_invert(): determinant is a zero!")
 		return mtrx3_idtt()
 	}
@@ -456,7 +456,7 @@ func mtrx3_solve_kramer(m mtrx3_t, v vec3_t) (rt vec3_t) {
 
 	det = mtrx3_det(m)
 
-	if math.Abs(float64(det)) < 0.000001 {
+	if fabs(det) < f_eps {
 		fmt.Println("mtrx_solve_kramer(): system has no solve\n")
 		return vec3_set(0.0, 0.0, 0.0)
 	}
