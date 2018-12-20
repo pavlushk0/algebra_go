@@ -7,21 +7,14 @@ import (
 
 type mtrx3_t [9]float32
 
-/*	multidimensional array mapping, array[i][j]
-	row-wise (C, C++):
-	(0	1)
-	(2	3)
-
-	column-wise (Fortran, Matlab):
-	(0	2)
-	(1	3)
-*/
-
 /*
 	Function prototypes
 
 func mtrx3_idtt() (rt mtrx3_t)
 func mtrx3_set(m [9]float32) (rt mtrx3_t)
+func mtrx3_set_float(a00, a01, a02,
+					 a10, a11, a12,
+					 a20, a21, a22 float32) (rt mtrx3_t)
 func mtrx3_set_euler(yaw, pitch, roll float32) (rt mtrx3_t)
 func mtrx3_set_axisangl(ax vec3_t, phi float32) (rt mtrx3_t)
 func mtrx3_show(m mtrx3_t)
@@ -41,16 +34,16 @@ func mtrx3_solve_kramer(m mtrx3_t, v vec3_t) (rt vec3_t)
 
 func mtrx3_idtt() (rt mtrx3_t) {
 	var (
-		i, j int32
-		n    int32 = 3
+		i, j   int32
+		mrange int32 = 3
 	)
 
-	for i = 0; i < n; i++ {
-		for j = 0; j < n; j++ {
+	for i = 0; i < mrange; i++ {
+		for j = 0; j < mrange; j++ {
 			if i == j {
-				rt[id_rw(i, j, n)] = 1.0
+				rt[id_rw(i, j, mrange)] = 1.0
 			} else {
-				rt[id_rw(i, j, n)] = 0.0
+				rt[id_rw(i, j, mrange)] = 0.0
 			}
 		}
 	}
@@ -60,15 +53,34 @@ func mtrx3_idtt() (rt mtrx3_t) {
 
 func mtrx3_set(m [9]float32) (rt mtrx3_t) {
 	var (
-		i, j int32
-		n    int32 = 3
+		i, j   int32
+		mrange int32 = 3
 	)
 
-	for i = 0; i < n; i++ {
-		for j = 0; j < n; j++ {
-			rt[id_rw(i, j, n)] = m[id_rw(i, j, n)]
+	for i = 0; i < mrange; i++ {
+		for j = 0; j < mrange; j++ {
+			rt[id_rw(i, j, mrange)] = m[id_rw(i, j, mrange)]
 		}
 	}
+
+	return rt
+}
+
+func mtrx3_set_float(a00, a01, a02,
+	a10, a11, a12,
+	a20, a21, a22 float32) (rt mtrx3_t) {
+
+	rt[0] = a00
+	rt[1] = a01
+	rt[2] = a02
+
+	rt[3] = a10
+	rt[4] = a11
+	rt[5] = a12
+
+	rt[6] = a20
+	rt[7] = a21
+	rt[8] = a22
 
 	return rt
 }
@@ -190,10 +202,23 @@ func mtrx3_mult(a, b mtrx3_t) (rt mtrx3_t) {
 	return rt
 }
 
-func mtrx3_mult_vec3(m mtrx3_t, v vec3_t) (rt vec3_t) {
-	rt[_XC] = m[0]*v[_XC] + m[1]*v[_YC] + m[2]*v[_ZC]
-	rt[_YC] = m[3]*v[_XC] + m[4]*v[_YC] + m[5]*v[_ZC]
-	rt[_ZC] = m[6]*v[_XC] + m[7]*v[_YC] + m[8]*v[_ZC]
+func mtrx3_mult_vec(m mtrx3_t, v vec3_t) (rt vec3_t) {
+	const (
+		mrange int32 = 3
+	)
+
+	var (
+		i, j int32
+		tmp  float32
+	)
+
+	for i = 0; i < mrange; i++ {
+		tmp = 0
+		for j = 0; j < mrange; j++ {
+			tmp = tmp + m[id_rw(i, j, mrange)]*v[j]
+		}
+		rt[i] = tmp
+	}
 
 	return rt
 }
@@ -250,30 +275,33 @@ func mtrx3_lu(m mtrx3_t) (l, u mtrx3_t) {
 	Нижнетреугольная (L, lm) матрица имеет единицы по диагонали
 */
 func mtrx3_lu(m mtrx3_t) (lm, um mtrx3_t) {
+	const (
+		mrange int32 = 3
+	)
+
 	var (
 		i, j, k int32
-		n       int32 = 3
 		sum     float32
 	)
 
-	for i = 0; i < n; i++ {
-		for k = i; k < n; k++ {
+	for i = 0; i < mrange; i++ {
+		for k = i; k < mrange; k++ {
 			sum = 0
 			for j = 0; j < i; j++ {
-				sum += (lm[id_rw(i, j, n)] * um[id_rw(j, k, n)])
+				sum += (lm[id_rw(i, j, mrange)] * um[id_rw(j, k, mrange)])
 			}
-			um[id_rw(i, k, n)] = m[id_rw(i, k, n)] - sum
+			um[id_rw(i, k, mrange)] = m[id_rw(i, k, mrange)] - sum
 		}
 
-		for k = i; k < n; k++ {
+		for k = i; k < mrange; k++ {
 			if i == k {
-				lm[id_rw(i, i, n)] = 1.0
+				lm[id_rw(i, i, mrange)] = 1.0
 			} else {
 				sum = 0
 				for j = 0; j < i; j++ {
-					sum += lm[id_rw(k, j, n)] * um[id_rw(j, i, n)]
+					sum += lm[id_rw(k, j, mrange)] * um[id_rw(j, i, mrange)]
 				}
-				lm[id_rw(k, i, n)] = (m[id_rw(k, i, n)] - sum) / um[id_rw(i, i, n)]
+				lm[id_rw(k, i, mrange)] = (m[id_rw(k, i, mrange)] - sum) / um[id_rw(i, i, mrange)]
 			}
 		}
 	}
@@ -282,25 +310,29 @@ func mtrx3_lu(m mtrx3_t) (lm, um mtrx3_t) {
 }
 
 func mtrx3_ldlt(m mtrx3_t) (lm mtrx3_t, dv vec3_t) {
+	const (
+		mrange int32 = 3
+	)
+
 	var (
 		i, j, k int32
-		n       int32 = 3
 		sum     float32
 	)
-	for i = 0; i < n; i++ {
-		for j = i; j < n; j++ {
-			sum = m[id_rw(j, i, n)]
+
+	for i = 0; i < mrange; i++ {
+		for j = i; j < mrange; j++ {
+			sum = m[id_rw(j, i, mrange)]
 			for k = 0; k < i; k++ {
-				sum = sum - lm[id_rw(i, k, n)]*dv[k]*lm[id_rw(j, k, n)]
+				sum = sum - lm[id_rw(i, k, mrange)]*dv[k]*lm[id_rw(j, k, mrange)]
 				if i == j {
 					if sum <= 0 {
 						fmt.Println("A is not positive deﬁnite")
 						return mtrx3_idtt(), vec3_set(0.0, 0.0, 0.0)
 					}
 					dv[i] = sum
-					lm[id_rw(i, i, n)] = 1.0
+					lm[id_rw(i, i, mrange)] = 1.0
 				} else {
-					lm[id_rw(j, i, n)] = sum / dv[i]
+					lm[id_rw(j, i, mrange)] = sum / dv[i]
 				}
 			}
 		}
@@ -310,19 +342,22 @@ func mtrx3_ldlt(m mtrx3_t) (lm mtrx3_t, dv vec3_t) {
 }
 
 func mtrx3_transpose(m mtrx3_t) (rt mtrx3_t) {
+	const (
+		mrange int32 = 3
+	)
+
 	var (
 		i, j int32
-		n    int32 = 3
 		tmp  float32
 	)
 
 	rt = m
 
-	for i = 0; i < n; i++ {
+	for i = 0; i < mrange; i++ {
 		for j = 0; j < i; j++ {
-			tmp = rt[id_rw(i, i, n)]
-			rt[id_rw(i, j, n)] = rt[id_rw(j, i, n)]
-			rt[id_rw(j, i, n)] = tmp
+			tmp = rt[id_rw(i, i, mrange)]
+			rt[id_rw(i, j, mrange)] = rt[id_rw(j, i, mrange)]
+			rt[id_rw(j, i, mrange)] = tmp
 		}
 	}
 
