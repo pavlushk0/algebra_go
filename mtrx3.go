@@ -7,8 +7,7 @@ import (
 
 type mtrx3_t [9]float32
 
-/*
-	Function prototypes
+/* func proto
 
 func mtrx3_idtt() (rt mtrx3_t)
 func mtrx3_set(m [9]float32) (rt mtrx3_t)
