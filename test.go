@@ -26,4 +26,11 @@ func main() {
 	fmt.Println("UxL = ")
 	tmp = mtrx3_mult(u, l)
 	mtrx3_show(tmp)
+
+	v1 := vec2_set(2.4, 4.1)
+	v2 := vec2_set(4.4, 1.1)
+
+	fmt.Println(vec2_dot(v1, v2))
+	fmt.Println(vec_dot(v1, v2))
+
 }
