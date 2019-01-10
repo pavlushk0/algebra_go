@@ -6,8 +6,7 @@ import (
 
 type vec4_t [4]float32
 
-/*
-	Function prototypes
+/* func proto
 
 func vec4_show(v vec4_t)
 func vec4_copy(v vec4_t) (rt vec4_t)

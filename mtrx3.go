@@ -325,7 +325,7 @@ func mtrx3_ldlt(m mtrx3_t) (lm mtrx3_t, dv vec3_t) {
 				sum = sum - lm[id_rw(i, k, mrange)]*dv[k]*lm[id_rw(j, k, mrange)]
 				if i == j {
 					if sum <= 0 {
-						fmt.Println("A is not positive deﬁnite")
+						fmt.Println("mtrx3_ldlt(): mtrx is not positive deﬁnite")
 						return mtrx3_idtt(), vec3_set(0.0, 0.0, 0.0)
 					}
 					dv[i] = sum
@@ -491,7 +491,7 @@ func mtrx3_solve_kramer(m mtrx3_t, v vec3_t) (rt vec3_t) {
 	det = mtrx3_det(m)
 
 	if fabs(det) < f_eps {
-		fmt.Println("mtrx_solve_kramer(): system has no solve\n")
+		fmt.Println("mtrx_solve_kramer(): system has no solve")
 		return vec3_set(0.0, 0.0, 0.0)
 	}
 

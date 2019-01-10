@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type mtrx4_t [16]float32
 
@@ -14,6 +17,14 @@ func mtrx4_set_float(a00, a01, a02,
 func mtrx4_set_euler(yaw, pitch, roll float32) (rt mtrx4_t)
 func mtrx4_set_axisangl(ax vec3_t, phi float32) (rt mtrx4_t)
 func mtrx4_show(m mtrx4_t)
+func mtrx4_det(m mtrx4_t) float32
+func mtrx4_det_lu(m mtrx4_t) (rt float32)				EMPTY
+func mtrx4_mult(a, b mtrx4_t) (rt mtrx4_t)
+func mtrx4_mult_vec(m mtrx4_t, v vec4_t) (rt vec4_t)
+func mtrx4_lu(m mtrx4_t) (lm, um mtrx4_t)
+func mtrx4_ldlt(m mtrx4_t) (lm mtrx4_t, dv vec4_t)
+func mtrx4_invert(m mtrx4_t) (rt mtrx4_t)				EMPTY
+func mtrx4_solve_gauss(m mtrx4_t, v vec4_t) (rt vec4_t)
 
 */
 
@@ -155,4 +166,245 @@ func mtrx4_show(m mtrx4_t) {
 	fmt.Printf("%5.2f %5.2f %5.2f %5.2f\n", m[4], m[5], m[6], m[7])
 	fmt.Printf("%5.2f %5.2f %5.2f %5.2f\n", m[8], m[9], m[10], m[11])
 	fmt.Printf("%5.2f %5.2f %5.2f %5.2f\n", m[12], m[13], m[14], m[15])
+}
+
+func mtrx4_det(m mtrx4_t) float32 {
+	return 0.0
+}
+
+func mtrx4_det_lu(m mtrx4_t) (rt float32) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i            int32
+		l, u         mtrx4_t
+		l_det, u_det float32
+	)
+
+	l, u = mtrx4_lu(m)
+
+	l_det = l[0]
+	u_det = u[0]
+
+	for i = 1; i < mrange; i++ {
+		l_det *= l[id_rw(i, i, mrange)]
+		u_det *= u[id_rw(i, i, mrange)]
+	}
+
+	return l_det * u_det
+}
+
+func mtrx4_mult(a, b mtrx4_t) (rt mtrx4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i, j, k int32
+		tmp     float32
+	)
+
+	for i = 0; i < mrange; i++ {
+		for j = 0; j < mrange; j++ {
+			tmp = 0.0
+			for k = 0; k < mrange; k++ {
+				tmp = tmp + a[id_rw(k, j, mrange)]*b[id_rw(i, k, mrange)]
+			}
+			rt[id_rw(i, j, mrange)] = tmp
+		}
+	}
+
+	return rt
+}
+
+func mtrx4_mult_vec(m mtrx4_t, v vec4_t) (rt vec4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i, j int32
+		tmp  float32
+	)
+
+	for i = 0; i < mrange; i++ {
+		tmp = 0
+		for j = 0; j < mrange; j++ {
+			tmp = tmp + m[id_rw(i, j, mrange)]*v[j]
+		}
+		rt[i] = tmp
+	}
+
+	return rt
+}
+
+func mtrx4_lu(m mtrx4_t) (lm, um mtrx4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i, j, k int32
+		sum     float32
+	)
+
+	for i = 0; i < mrange; i++ {
+		for k = i; k < mrange; k++ {
+			sum = 0
+			for j = 0; j < i; j++ {
+				sum += (lm[id_rw(i, j, mrange)] * um[id_rw(j, k, mrange)])
+			}
+			um[id_rw(i, k, mrange)] = m[id_rw(i, k, mrange)] - sum
+		}
+
+		for k = i; k < mrange; k++ {
+			if i == k {
+				lm[id_rw(i, i, mrange)] = 1.0
+			} else {
+				sum = 0
+				for j = 0; j < i; j++ {
+					sum += lm[id_rw(k, j, mrange)] * um[id_rw(j, i, mrange)]
+				}
+				lm[id_rw(k, i, mrange)] = (m[id_rw(k, i, mrange)] - sum) / um[id_rw(i, i, mrange)]
+			}
+		}
+	}
+
+	return lm, um
+}
+
+func mtrx4_ldlt(m mtrx4_t) (lm mtrx4_t, dv vec4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i, j, k int32
+		sum     float32
+	)
+
+	for i = 0; i < mrange; i++ {
+		for j = i; j < mrange; j++ {
+			sum = m[id_rw(j, i, mrange)]
+			for k = 0; k < i; k++ {
+				sum = sum - lm[id_rw(i, k, mrange)]*dv[k]*lm[id_rw(j, k, mrange)]
+				if i == j {
+					if sum <= 0 {
+						fmt.Println("mtrx4_ldlt(): mtrx is not positive deﬁnite")
+						return mtrx4_idtt(), vec4_set(0.0, 0.0, 0.0, 0.0)
+					}
+					dv[i] = sum
+					lm[id_rw(i, i, mrange)] = 1.0
+				} else {
+					lm[id_rw(j, i, mrange)] = sum / dv[i]
+				}
+			}
+		}
+	}
+
+	return lm, dv
+}
+
+func mtrx4_invert(m mtrx4_t) (rt mtrx4_t) {
+	return mtrx4_idtt()
+}
+
+func mtrx4_solve_gauss(m mtrx4_t, v vec4_t) (rt vec4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i, j, k int32
+		t       float32
+		a       [mrange][mrange + 1]float32
+	)
+
+	for i = 0; i < mrange; i++ { //было ++i
+		for j = 0; j < mrange; j++ { //было ++j
+			a[i][j] = m[id_rw(i, j, mrange)]
+			a[i][mrange] = v[i]
+		}
+	}
+
+	/* Pivotisation */
+	for i = 0; i < mrange; i++ {
+		for k = i + 1; k < mrange; k++ {
+			if math.Abs(float64(a[i][i])) < math.Abs(float64(a[k][i])) {
+				for j = 0; j <= mrange; j++ {
+					t = a[i][j]
+					a[i][j] = a[k][j]
+					a[k][j] = t
+				}
+			}
+		}
+	}
+
+	/* прямой ход */
+	for k = 1; k < mrange; k++ {
+		for j = k; j < mrange; j++ {
+			t = a[j][k-1] / a[k-1][k-1]
+			for i = 0; i < mrange+1; i++ {
+				a[j][i] = a[j][i] - t*a[k-1][i]
+			}
+		}
+	}
+
+	/* обратный ход */
+	for i = mrange - 1; i >= 0; i-- {
+		rt[i] = a[i][mrange] / a[i][i]
+		for j = mrange - 1; j > i; j-- {
+			rt[i] = rt[i] - a[i][j]*rt[j]/a[i][i]
+		}
+	}
+
+	return rt
+}
+
+func mtrx4_insert_cmn(m mtrx4_t, v vec4_t, cmn int32) (rt mtrx4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i int32
+		j int32 = 0
+	)
+
+	rt = m
+
+	for i = cmn; i < mrange*mrange; i += mrange {
+		rt[i] = v[j]
+		j++
+	}
+	return rt
+
+}
+
+func mtrx4_solve_kramer(m mtrx4_t, v vec4_t) (rt vec4_t) {
+	const (
+		mrange int32 = 4
+	)
+
+	var (
+		i       int32
+		det     float32
+		kr_mtrx mtrx4_t
+	)
+
+	det = mtrx4_det_lu(m)
+
+	if fabs(det) < f_eps {
+		fmt.Println("mtrx4_solve_kramer(): system has no solve")
+		return vec4_set(0.0, 0.0, 0.0, 0.0)
+	}
+
+	for i = 0; i < mrange; i++ {
+		kr_mtrx = mtrx4_insert_cmn(m, v, i)
+		rt[i] = mtrx4_det_lu(kr_mtrx) / det
+	}
+
+	return rt
 }
