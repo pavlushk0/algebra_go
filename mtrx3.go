@@ -491,7 +491,7 @@ func mtrx3_solve_kramer(m mtrx3_t, v vec3_t) (rt vec3_t) {
 	det = mtrx3_det(m)
 
 	if fabs(det) < f_eps {
-		fmt.Println("mtrx_solve_kramer(): system has no solve")
+		fmt.Println("mtrx3_solve_kramer(): system has no solve")
 		return vec3_set(0.0, 0.0, 0.0)
 	}
 
