@@ -47,7 +47,7 @@ func mtrx4_idtt() (rt mtrx4_t) {
 	return rt
 }
 
-func mtrx4_set(m [16]float32) (rt mtrx3_t) {
+func mtrx4_set(m [16]float32) (rt mtrx4_t) {
 	var (
 		i, j int32
 		n    int32 = 4
