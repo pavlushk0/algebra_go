@@ -16,6 +16,9 @@ func mtrx3_set_float(a00, a01, a02,
 					 a20, a21, a22 float32) (rt mtrx3_t)
 func mtrx3_set_euler(yaw, pitch, roll float32) (rt mtrx3_t)
 func mtrx3_set_axisangl(ax vec3_t, phi float32) (rt mtrx3_t)
+func mtrx3_set_yaw(angl float32) (rt mtrx3_t)
+func mtrx3_set_pitch(angl float32) (rt mtrx3_t)
+func mtrx3_set_roll(angl float32) (rt mtrx3_t)
 func mtrx3_show(m mtrx3_t)
 func mtrx3_det(m mtrx3_t) (rt float32)
 func mtrx3_det_lu(m mtrx3_t) (rt float32)
@@ -136,6 +139,73 @@ func mtrx3_set_axisangl(ax vec3_t, phi float32) (rt mtrx3_t) {
 	rt[6] = (1.0-cosphi)*vxvz - sinphi*vy
 	rt[7] = (1.0-cosphi)*vyvz + sinphi*vx
 	rt[8] = cosphi + (1.0-cosphi)*vz*vz
+
+	return rt
+}
+
+func mtrx3_set_yaw(angl float32) (rt mtrx3_t) {
+	var (
+		sa, ca float32
+	)
+
+	sa = sinf(deg_to_rad(angl))
+	ca = cosf(deg_to_rad(angl))
+
+	rt[0] = ca
+	rt[1] = -sa
+	rt[2] = 0.0
+
+	rt[3] = sa
+	rt[4] = ca
+	rt[5] = 0.0
+
+	rt[6] = 0.0
+	rt[7] = 0.0
+	rt[8] = 1.0
+
+	return rt
+}
+
+func mtrx3_set_pitch(angl float32) (rt mtrx3_t) {
+	var (
+		sa, ca float32
+	)
+
+	sa = sinf(deg_to_rad(angl))
+	ca = cosf(deg_to_rad(angl))
+
+	rt[0] = 1.0
+	rt[1] = 0.0
+	rt[2] = 0.0
+
+	rt[3] = 0.0
+	rt[4] = ca
+	rt[5] = -sa
+
+	rt[6] = 0.0
+	rt[7] = sa
+	rt[8] = ca
+
+	return rt
+}
+
+func mtrx3_set_roll(angl float32) (rt mtrx3_t) {
+	var (
+		sa, ca float32
+	)
+
+	sa = sinf(deg_to_rad(angl))
+	ca = cosf(deg_to_rad(angl))
+
+	rt[0] = ca
+	rt[1] = 0.0
+	rt[2] = sa
+	rt[3] = 0.0
+	rt[4] = 1.0
+	rt[5] = 0.0
+	rt[6] = -sa
+	rt[7] = 0.0
+	rt[8] = ca
 
 	return rt
 }

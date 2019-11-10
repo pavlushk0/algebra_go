@@ -12,10 +12,8 @@ type qtnn_t [4]float32
 
 func qtnn_show(q qtnn_t)
 func qtnn_lenght(q qtnn_t) float32
-func qtnn_normalize_self(q qtnn_t)
-func qtnn_get_normalize(q qtnn_t) (rt qtnn_t)
-func qtnn_invert_self(q qtnn_t)
-func qtnn_get_invert(q qtnn_t) (rt qtnn_t)
+func qtnn_normalize(q qtnn_t) (rt qtnn_t)
+func qtnn_inverse(q qtnn_t) (rt qtnn_t)
 func qtnn_scale(q qtnn_t, scale float32) (rt qtnn_t)
 func qtnn_sum(a, b qtnn_t) (rt qtnn_t)
 func qtnn_sub(a, b qtnn_t) (rt qtnn_t)
@@ -42,7 +40,7 @@ func qtnn_lenght(q qtnn_t) float32 {
 			q[_WC]*q[_WC])))
 }
 
-func qtnn_normalize_self(q qtnn_t) {
+func qtnn_normalize(q qtnn_t) (rt qtnn_t) {
 	var (
 		len float32
 	)
@@ -50,34 +48,20 @@ func qtnn_normalize_self(q qtnn_t) {
 	len = qtnn_lenght(q)
 
 	if len != 0.0 {
-		q[_WC] = q[_WC] / len
-		q[_XC] = q[_XC] / len
-		q[_YC] = q[_YC] / len
-		q[_ZC] = q[_ZC] / len
+		rt[_WC] = q[_WC] / len
+		rt[_XC] = q[_XC] / len
+		rt[_YC] = q[_YC] / len
+		rt[_ZC] = q[_ZC] / len
 	}
-}
-
-func qtnn_get_normalize(q qtnn_t) (rt qtnn_t) {
-	rt = q
-
-	qtnn_normalize_self(rt)
 
 	return rt
 }
 
-func qtnn_invert_self(q qtnn_t) {
-	q[_WC] = q[_WC]
-	q[_XC] = -q[_XC]
-	q[_YC] = -q[_YC]
-	q[_ZC] = -q[_ZC]
-
-	qtnn_normalize_self(q)
-}
-
-func qtnn_get_invert(q qtnn_t) (rt qtnn_t) {
-	rt = q
-
-	qtnn_invert_self(rt)
+func qtnn_inverse(q qtnn_t) (rt qtnn_t) {
+	rt[_WC] = q[_WC]
+	rt[_XC] = -q[_XC]
+	rt[_YC] = -q[_YC]
+	rt[_ZC] = -q[_ZC]
 
 	return rt
 }
@@ -183,7 +167,7 @@ func qtnn_transform_vec3(a qtnn_t, b vec3_t) (rt vec3_t) {
 	vq = qtnn_from_vec3(b)
 
 	tmp = qtnn_mult(a, vq)
-	tmp = qtnn_mult(tmp, qtnn_get_invert(a))
+	tmp = qtnn_mult(tmp, qtnn_inverse(a))
 
 	return qtnn_to_vec3(tmp)
 }

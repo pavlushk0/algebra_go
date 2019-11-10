@@ -34,6 +34,7 @@ const (
 func id_rw(i int32, j int32, n int32) int32
 func id_cw(i int32, j int32, n int32) int32
 func fabs(x float32) float32
+func deg_to_rad(deg float32) float32
 func cosf(x float32) float32
 func sinf(x float32) float32
 func sqrtf(x float32) float32
@@ -63,6 +64,10 @@ func fabs(x float32) float32 {
 	} else {
 		return x
 	}
+}
+
+func deg_to_rad(deg float32) float32 {
+	return deg * M_PI / 180.0
 }
 
 /*
