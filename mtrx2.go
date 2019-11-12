@@ -12,7 +12,7 @@ type mtrx2_t [4]float32
 func mtrx2_idtt() (rt mtrx2_t)
 func mtrx2_set(m [9]float32) (rt mtrx2_t)
 func mtrx2_set_float(a00, a01, a10, a11 float32) (rt mtrx2_t)
-func mtrx2_set_rot(phi float32)
+func mtrx2_set_rtn(phi float32)
 func mtrx2_show(m mtrx2_t)
 func mtrx2_det(m mtrx2_t) (rt float32)
 func mtrx2_det_lu(m mtrx2_t) (rt float32)
@@ -77,7 +77,7 @@ func mtrx2_set_float(a00, a01, a10, a11 float32) (rt mtrx2_t) {
 	return rt
 }
 
-func mtrx2_rot(phi float32) (rt mtrx2_t) {
+func mtrx2_rtn(phi float32) (rt mtrx2_t) {
 	var (
 		cosphi, sinphi float32
 	)
@@ -272,7 +272,7 @@ func mtrx2_invert(m mtrx2_t) mtrx2_t {
 	det = mtrx2_det(m)
 
 	if fabs(det) < f_eps {
-		fmt.Println("mtrx_invert(): determinant is a zero!\n")
+		fmt.Println("mtrx_invert(): determinant is a zero!")
 		return mtrx2_idtt()
 	}
 
@@ -365,7 +365,7 @@ func mtrx2_solve_kramer(m mtrx2_t, v vec3_t) (rt vec3_t) {
 	det = mtrx2_det(m)
 
 	if fabs(det) < f_eps {
-		fmt.Println("mtrx_solve_kramer(): system has no solve\n")
+		fmt.Println("mtrx_solve_kramer(): system has no solve")
 		return vec3_set(0.0, 0.0, 0.0)
 	}
 

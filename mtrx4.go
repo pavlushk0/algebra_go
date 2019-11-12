@@ -18,7 +18,7 @@ func mtrx4_set_euler(yaw, pitch, roll float32) (rt mtrx4_t)
 func mtrx4_set_axisangl(ax vec3_t, phi float32) (rt mtrx4_t)
 func mtrx4_show(m mtrx4_t)
 func mtrx4_det(m mtrx4_t) float32
-func mtrx4_det_lu(m mtrx4_t) (rt float32)				EMPTY
+func mtrx4_det_lu(m mtrx4_t) (rt float32)
 func mtrx4_mult(a, b mtrx4_t) (rt mtrx4_t)
 func mtrx4_mult_vec(m mtrx4_t, v vec4_t) (rt vec4_t)
 func mtrx4_lu(m mtrx4_t) (lm, um mtrx4_t)
