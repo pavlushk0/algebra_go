@@ -50,11 +50,11 @@ func sqrtf(x float32) float32
 	(1	3)
 */
 
-func id_rw(i int32, j int32, n int32) int32 {
+func idRw(i int32, j int32, n int32) int32 {
 	return (i*n + j)
 }
 
-func id_cw(i int32, j int32, n int32) int32 {
+func idCw(i int32, j int32, n int32) int32 {
 	return (j*n + i)
 }
 
